@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScrapeMaster — Professional Web Scraping Tool</title>
+  <meta name="description" content="A professional, easy-to-use web scraping tool with CSS/XPath selectors, data preview, export, scheduling, and more.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕷</text></svg>">
+</head>
+<body>
+
+<div class="app-layout">
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">🕷</div>
+      <div>
+        <div class="brand-name">ScrapeMaster</div>
+        <div class="brand-tag">Web Scraper</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <button class="nav-item active" data-page="dashboard" id="nav-dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-page="scrape" id="nav-scrape">
+        <span class="nav-icon">🔍</span> New Scrape
+      </button>
+      <button class="nav-item" data-page="history" id="nav-history">
+        <span class="nav-icon">📁</span> History
+        <span class="nav-badge" id="history-count">0</span>
+      </button>
+
+      <div class="nav-section-label">Automation</div>
+      <button class="nav-item" data-page="schedules" id="nav-schedules">
+        <span class="nav-icon">⏱️</span> Schedules
+      </button>
+
+      <div class="nav-section-label">Tools</div>
+      <button class="nav-item" data-page="settings" id="nav-settings">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version-text">ScrapeMaster v1.0.0</div>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="main-content">
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+        <div>
+          <div class="page-title" id="pageTitle">Dashboard</div>
+          <div class="page-subtitle" id="pageSubtitle">Overview of your scraping activity</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" id="quickScrapeBtn">
+          <span>⚡</span> Quick Scrape
+        </button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- ==================== DASHBOARD PAGE ==================== -->
+      <section class="page-section active" id="page-dashboard">
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">🔍</div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-total-scrapes">0</div>
+              <div class="stat-label">Total Scrapes</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">📦</div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-data-points">0</div>
+              <div class="stat-label">Data Points</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber">⏱️</div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-active-schedules">0</div>
+              <div class="stat-label">Active Schedules</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon slate">✅</div>
+            <div class="stat-info">
+              <div class="stat-value" id="stat-success-rate">—</div>
+              <div class="stat-label">Success Rate</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions + Recent -->
+        <div class="grid-2">
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Quick Actions</h3>
+            </div>
+            <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+              <button class="btn btn-primary w-full" onclick="App.navigate('scrape')">🔍 Start New Scrape</button>
+              <button class="btn btn-secondary w-full" onclick="App.navigate('schedules')">⏱️ Manage Schedules</button>
+              <button class="btn btn-secondary w-full" onclick="App.navigate('history')">📁 View History</button>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Activity</h3>
+            </div>
+            <div class="card-body" id="recent-activity">
+              <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h4>No activity yet</h4>
+                <p>Start your first scrape to see activity here</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCRAPE PAGE ==================== -->
+      <section class="page-section" id="page-scrape">
+        <div class="split-layout">
+          <!-- Left: Configuration -->
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <!-- URL Input -->
+            <div class="card">
+              <div class="card-header">
+                <h3>🌐 Target URL</h3>
+              </div>
+              <div class="card-body">
+                <div class="form-group" style="margin-bottom:0;">
+                  <div class="input-group">
+                    <input type="url" class="form-input" id="scrapeUrl" placeholder="https://example.com/page" autocomplete="url">
+                    <button class="btn btn-primary" id="fetchBtn" onclick="Scraper.fetchPage()">Fetch</button>
+                  </div>
+                  <div class="form-hint">Enter the URL of the page you want to scrape</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Selectors -->
+            <div class="card">
+              <div class="card-header">
+                <h3>🎯 Selectors</h3>
+                <button class="btn btn-sm btn-secondary" onclick="Scraper.addSelector()">+ Add</button>
+              </div>
+              <div class="card-body">
+                <div class="tabs">
+                  <button class="tab-btn active" data-tab="css" onclick="Scraper.switchSelectorTab('css')">CSS Selectors</button>
+                  <button class="tab-btn" data-tab="xpath" onclick="Scraper.switchSelectorTab('xpath')">XPath</button>
+                </div>
+                <div class="selector-list" id="selectorList">
+                  <div class="selector-row">
+                    <input type="text" class="form-input selector-name" placeholder="Field name" value="title">
+                    <input type="text" class="form-input" placeholder="e.g. h1, .title, #main" value="">
+                    <select class="form-select selector-type">
+                      <option value="text">Text</option>
+                      <option value="html">HTML</option>
+                      <option value="attr">Attribute</option>
+                      <option value="href">Href</option>
+                      <option value="src">Src</option>
+                    </select>
+                    <button class="btn-remove" onclick="Scraper.removeSelector(this)">✕</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="card">
+              <div class="card-body" style="padding-top:8px;padding-bottom:8px;">
+                <button class="collapse-header" onclick="toggleCollapse(this)">
+                  📄 Pagination Settings
+                  <span class="collapse-icon">▼</span>
+                </button>
+                <div class="collapse-body" id="paginationBody">
+                  <div class="form-group">
+                    <label class="form-label">Pagination Type</label>
+                    <select class="form-select" id="paginationType">
+                      <option value="none">No Pagination</option>
+                      <option value="next-link">Next Page Link</option>
+                      <option value="url-pattern">URL Pattern (page=1, page=2...)</option>
+                    </select>
+                  </div>
+                  <div id="paginationOptions" class="hidden">
+                    <div class="form-group">
+                      <label class="form-label">Next Page Selector / URL Pattern</label>
+                      <input type="text" class="form-input" id="paginationSelector" placeholder="a.next-page or ?page={n}">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Max Pages</label>
+                      <input type="number" class="form-input" id="maxPages" value="5" min="1" max="100">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Authentication -->
+            <div class="card">
+              <div class="card-body" style="padding-top:8px;padding-bottom:8px;">
+                <button class="collapse-header" onclick="toggleCollapse(this)">
+                  🔒 Authentication <span class="form-hint" style="margin:0;margin-left:8px;">(Optional)</span>
+                  <span class="collapse-icon">▼</span>
+                </button>
+                <div class="collapse-body" id="authBody">
+                  <div class="form-group">
+                    <label class="form-label">Login URL</label>
+                    <input type="url" class="form-input" id="authLoginUrl" placeholder="https://example.com/login">
+                  </div>
+                  <div class="grid-2">
+                    <div class="form-group">
+                      <label class="form-label">Username</label>
+                      <input type="text" class="form-input" id="authUsername" placeholder="username">
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Password</label>
+                      <input type="password" class="form-input" id="authPassword" placeholder="••••••••">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">CSRF Token Selector <span class="optional">(optional)</span></label>
+                    <input type="text" class="form-input" id="authCsrf" placeholder="input[name='csrf_token']">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Run Button -->
+            <div class="btn-group">
+              <button class="btn btn-primary btn-lg" id="runScrapeBtn" onclick="Scraper.run()" style="flex:1;">
+                🚀 Run Scrape
+              </button>
+              <button class="btn btn-secondary btn-lg" onclick="Scraper.preview()">
+                👁 Preview
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: Preview/Results -->
+          <div style="display:flex;flex-direction:column;gap:20px;position:sticky;top:84px;">
+            <div class="preview-panel">
+              <div class="preview-header">
+                <span>📋 Results Preview</span>
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-ghost" id="viewTableBtn" onclick="Scraper.setView('table')" style="font-weight:600;">Table</button>
+                  <button class="btn btn-sm btn-ghost" onclick="Scraper.setView('json')">JSON</button>
+                  <button class="btn btn-sm btn-ghost" onclick="Scraper.setView('raw')">Raw</button>
+                </div>
+              </div>
+              <div class="preview-body" id="previewBody">
+                <div class="empty-state">
+                  <div class="empty-icon">🔎</div>
+                  <h4>No data yet</h4>
+                  <p>Enter a URL and selectors, then click "Run Scrape" or "Preview"</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Export -->
+            <div class="card" id="exportCard" style="display:none;">
+              <div class="card-header">
+                <h3>📤 Export Data</h3>
+                <span class="text-sm text-muted" id="exportCount"></span>
+              </div>
+              <div class="card-body">
+                <div class="btn-group">
+                  <button class="btn btn-secondary" onclick="Scraper.exportData('csv')">📄 CSV</button>
+                  <button class="btn btn-secondary" onclick="Scraper.exportData('json')">📋 JSON</button>
+                  <button class="btn btn-secondary" onclick="Scraper.exportData('excel')">📊 Excel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== HISTORY PAGE ==================== -->
+      <section class="page-section" id="page-history">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <span class="search-icon">🔍</span>
+              <input type="text" class="form-input" id="historySearch" placeholder="Search by URL..." oninput="History.filter()">
+            </div>
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all" onclick="History.setFilter('all', this)">All</button>
+              <button class="filter-pill" data-filter="success" onclick="History.setFilter('success', this)">Success</button>
+              <button class="filter-pill" data-filter="failed" onclick="History.setFilter('failed', this)">Failed</button>
+              <button class="filter-pill" data-filter="running" onclick="History.setFilter('running', this)">Running</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-danger btn-sm" onclick="History.clearAll()">🗑 Clear All</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="table-container">
+            <table class="data-table" id="historyTable">
+              <thead>
+                <tr>
+                  <th>URL</th>
+                  <th>Selectors</th>
+                  <th>Results</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody">
+                <!-- Dynamic content -->
+              </tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="historyEmpty">
+            <div class="empty-icon">📭</div>
+            <h4>No scrape history</h4>
+            <p>Your completed scrapes will appear here</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== SCHEDULES PAGE ==================== -->
+      <section class="page-section" id="page-schedules">
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <h3 style="font-size:0.95rem;">Active Schedules</h3>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-primary" onclick="Scheduler.showCreateModal()">+ New Schedule</button>
+          </div>
+        </div>
+
+        <div class="schedule-grid" id="scheduleGrid">
+          <!-- Dynamic schedule cards -->
+        </div>
+
+        <div class="empty-state" id="scheduleEmpty">
+          <div class="empty-icon">⏱️</div>
+          <h4>No schedules yet</h4>
+          <p>Create a schedule to automatically scrape pages at regular intervals</p>
+          <button class="btn btn-primary mt-4" onclick="Scheduler.showCreateModal()">+ Create Schedule</button>
+        </div>
+      </section>
+
+      <!-- ==================== SETTINGS PAGE ==================== -->
+      <section class="page-section" id="page-settings">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>⚙️ General Settings</h3></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Default User Agent</label>
+                <input type="text" class="form-input" id="settingUserAgent" value="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Request Timeout (seconds)</label>
+                <input type="number" class="form-input" id="settingTimeout" value="30" min="5" max="120">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Delay Between Requests (ms)</label>
+                <input type="number" class="form-input" id="settingDelay" value="1000" min="0" max="10000">
+              </div>
+              <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div class="form-label" style="margin-bottom:0;">Follow Redirects</div>
+                  <div class="form-hint" style="margin-top:2px;">Automatically follow HTTP redirects</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settingRedirects" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <button class="btn btn-primary mt-4" onclick="Settings.save()">Save Settings</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>🗄️ Data Management</h3></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Storage Used</label>
+                <div class="progress-bar mt-2">
+                  <div class="progress-fill" id="storageBar" style="width: 0%;"></div>
+                </div>
+                <div class="form-hint" id="storageText">Calculating...</div>
+              </div>
+              <div class="form-group" style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+                <button class="btn btn-secondary w-full" onclick="Settings.exportAllData()">📤 Export All Data</button>
+                <button class="btn btn-danger w-full" onclick="Settings.clearAllData()">🗑 Clear All Data</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>🌐 Proxy Settings</h3></div>
+            <div class="card-body">
+              <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div class="form-label" style="margin-bottom:0;">Enable Proxy</div>
+                  <div class="form-hint" style="margin-top:2px;">Route requests through a proxy server</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="settingProxyEnabled">
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div id="proxyFields" class="hidden">
+                <div class="form-group">
+                  <label class="form-label">Proxy URL</label>
+                  <input type="text" class="form-input" id="settingProxyUrl" placeholder="http://proxy:8080">
+                </div>
+                <div class="grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Username <span class="optional">(optional)</span></label>
+                    <input type="text" class="form-input" id="settingProxyUser">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password <span class="optional">(optional)</span></label>
+                    <input type="password" class="form-input" id="settingProxyPass">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><h3>📋 Request Headers</h3></div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label">Custom Headers (JSON)</label>
+                <textarea class="form-textarea" id="settingHeaders" rows="6" placeholder='{"Accept": "text/html", "Accept-Language": "en-US"}'>{
+  "Accept": "text/html,application/xhtml+xml",
+  "Accept-Language": "en-US,en;q=0.9"
+}</textarea>
+              </div>
+              <button class="btn btn-primary mt-2" onclick="Settings.save()">Save Headers</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- ========== SCHEDULE MODAL ========== -->
+<div class="modal-overlay" id="scheduleModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>⏱️ Create New Schedule</h3>
+      <button class="modal-close" onclick="Scheduler.closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Target URL</label>
+        <input type="url" class="form-input" id="scheduleUrl" placeholder="https://example.com/page">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Selectors (comma-separated CSS selectors)</label>
+        <input type="text" class="form-input" id="scheduleSelectors" placeholder="h1, .price, .title">
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Interval</label>
+          <input type="number" class="form-input" id="scheduleInterval" value="60" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unit</label>
+          <select class="form-select" id="scheduleUnit">
+            <option value="minutes">Minutes</option>
+            <option value="hours" selected>Hours</option>
+            <option value="days">Days</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Schedule Name <span class="optional">(optional)</span></label>
+        <input type="text" class="form-input" id="scheduleName" placeholder="e.g. Price Monitor">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="Scheduler.closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="Scheduler.create()">Create Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== DETAIL MODAL ========== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h3 id="detailModalTitle">Scrape Details</h3>
+      <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    </div>
+    <div class="modal-body" id="detailModalBody">
+      <!-- Dynamic content -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn btn-primary" id="detailRerunBtn">🔄 Re-run</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

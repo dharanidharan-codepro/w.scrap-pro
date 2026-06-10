@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IMDb Scraper — Top 250 Movie</title>
+    <meta name="description" content="A professional IMDb Top 250 movie scraper dashboard with CSV export and live scraping controls." />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Audiowide&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+    <!-- Scanline overlay -->
+    <div class="scanline-overlay" aria-hidden="true"></div>
+
+    <div class="app-shell">
+        <!-- ========== SIDEBAR ========== -->
+        <aside class="sidebar-panel" id="sidebar">
+            <div class="sidebar-top">
+                <div class="brand-block">
+                    <div class="brand-icon">⬡</div>
+                    <h1>IMDB<br/>SCRAPER</h1>
+                    <p class="brand-sub">Movie Scrapper</p>
+                </div>
+                <nav class="nav-links" id="navLinks">
+                    <button class="nav-item active" data-view="dashboard-view">
+                        <span class="nav-icon">◈</span> Dashboard
+                    </button>
+                    <button class="nav-item" data-view="analytics-view">
+                        <span class="nav-icon">◈</span> Analytics
+                    </button>
+                    <button class="nav-item" data-view="export-view">
+                        <span class="nav-icon">⬡</span> Export
+                    </button>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- ========== MAIN CONTENT ========== -->
+        <main class="main-content">
+
+            <!-- ============================================================ -->
+            <!-- DASHBOARD VIEW -->
+            <!-- ============================================================ -->
+            <div class="view-container active" id="dashboard-view">
+
+                <!-- TOP CONTROL PANEL -->
+                <section class="glass-panel control-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2 class="section-title">IMDb Top 250 Scraper</h2>
+                            <p class="section-desc">Live scraping dashboard with dynamic real-time updates.</p>
+                        </div>
+                        <div class="control-row">
+                            <label class="toggle-switch" title="Toggle headless browser mode">
+                                <input id="headlessToggle" type="checkbox" checked />
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="toggle-label">Headless Mode</span>
+                        </div>
+                    </div>
+
+                    <div class="action-grid">
+                        <button id="startButton" class="neon-button primary">
+                            <span class="btn-icon">▶</span> Start Scraping
+                        </button>
+                        <button id="stopButton" class="neon-button danger" disabled>
+                            <span class="btn-icon">■</span> Stop Scraping
+                        </button>
+                        <button id="downloadButton" class="neon-button secondary">
+                            <span class="btn-icon">⬇</span> Export CSV
+                        </button>
+                    </div>
+
+                    <div class="range-grid">
+                        <div class="input-card">
+                            <label for="scrapeLimit">Top N Limit</label>
+                            <select id="scrapeLimit">
+                                <option value="">All 250</option>
+                                <option value="50">Top 50</option>
+                                <option value="100">Top 100</option>
+                                <option value="150">Top 150</option>
+                                <option value="200">Top 200</option>
+                            </select>
+                        </div>
+                        <div class="input-card">
+                            <label for="startRank">Start Rank</label>
+                            <input id="startRank" type="number" min="1" max="250" value="1" />
+                        </div>
+                        <div class="input-card">
+                            <label for="endRank">End Rank</label>
+                            <input id="endRank" type="number" min="1" max="250" value="250" />
+                        </div>
+                    </div>
+
+                    <!-- Status row -->
+                    <div class="status-block">
+                        <div class="status-row">
+                            <div class="status-pill" id="statusIndicator">
+                                <span class="pulse-dot"></span> Idle
+                            </div>
+                            <span class="status-msg" id="statusMessage">Ready to scrape IMDb Top 250.</span>
+                        </div>
+                        <div class="progress-bar-wrap">
+                            <div class="progress-bar" id="progressBar">
+                                <div class="progress-glow"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- KPI METRICS -->
+                <section class="metrics-row">
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Movies Scraped</span>
+                        <strong class="metric-value" id="liveCount">0</strong>
+                        <div class="metric-bar"><div class="metric-bar-fill" id="metricBarMovies"></div></div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Average Rating</span>
+                        <strong class="metric-value" id="avgRating">0.0</strong>
+                        <div class="metric-bar"><div class="metric-bar-fill cyan" id="metricBarRating"></div></div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Scrape Progress</span>
+                        <strong class="metric-value" id="progressText">0%</strong>
+                        <div class="metric-bar"><div class="metric-bar-fill magenta" id="metricBarProgress"></div></div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <span class="metric-label">Status</span>
+                        <strong class="metric-value status-text" id="metricStatus">IDLE</strong>
+                        <div class="metric-bar"><div class="metric-bar-fill amber" id="metricBarStatus"></div></div>
+                    </div>
+                </section>
+
+                <!-- SEARCH AND FILTER -->
+                <section class="glass-panel search-panel">
+                    <div class="search-row">
+                        <div class="input-card">
+                            <label for="searchInput">🔍 Search Movies</label>
+                            <input id="searchInput" type="text" placeholder="Type a movie title..." autocomplete="off" />
+                        </div>
+                        <div class="input-card">
+                            <label for="ratingFilter">★ Min Rating</label>
+                            <input id="ratingFilter" type="number" min="0" max="10" step="0.1" placeholder="e.g. 8.5" />
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MOVIE TABLE -->
+                <section class="glass-panel table-panel" id="tablePanel">
+                    <div class="table-header">
+                        <h3>Movie Results</h3>
+                        <span class="note" id="movieCount">0 movies loaded</span>
+                    </div>
+                    <div class="table-wrapper" id="tableWrapper">
+                        <div class="laser-scan" id="laserScan"></div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Movie</th>
+                                    <th>Year</th>
+                                    <th>Duration</th>
+                                    <th>Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movieTableBody"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- EXPORT VIEW -->
+            <!-- ============================================================ -->
+            <div class="view-container" id="export-view">
+                <section class="glass-panel export-card">
+                    <div class="export-icon">⬡</div>
+                    <h2 class="section-title">Export Scraped Data</h2>
+                    <p class="section-desc">Download all scraped movie data as a CSV file for analysis, research, or portfolio presentations.</p>
+
+                    <div class="export-schema">
+                        <h4>CSV Schema</h4>
+                        <div class="schema-grid">
+                            <span class="schema-tag">rank</span>
+                            <span class="schema-tag">title</span>
+                            <span class="schema-tag">year</span>
+                            <span class="schema-tag">rating</span>
+                            <span class="schema-tag">duration</span>
+                            <span class="schema-tag">certificate</span>
+                            <span class="schema-tag">votes</span>
+                            <span class="schema-tag">poster</span>
+                        </div>
+                    </div>
+
+                    <div class="export-stats">
+                        <div class="export-stat">
+                            <span>Total Rows</span>
+                            <strong id="exportRowCount">0</strong>
+                        </div>
+                        <div class="export-stat">
+                            <span>File Format</span>
+                            <strong>CSV (UTF-8)</strong>
+                        </div>
+                        <div class="export-stat">
+                            <span>Scrape Status</span>
+                            <strong id="exportScrapeStatus">Idle</strong>
+                        </div>
+                    </div>
+
+                    <button id="exportDownloadBtn" class="neon-button primary export-btn">
+                        <span class="btn-icon">⬇</span> Download CSV File
+                    </button>
+                </section>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- ANALYTICS VIEW -->
+            <!-- ============================================================ -->
+            <div class="view-container" id="analytics-view">
+                <section class="glass-panel analytics-card">
+                    <div class="panel-heading">
+                        <div>
+                            <h2 class="section-title">Movie Ratings Analytics</h2>
+                            <p class="section-desc">Visual and statistical breakdown of the scraped movie ratings.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="metrics-row" style="margin-top: 24px;">
+                        <div class="metric-card glass-panel">
+                            <span class="metric-label">Average Rating</span>
+                            <strong class="metric-value" id="analyticsAvgRating">0.0</strong>
+                            <div class="metric-bar"><div class="metric-bar-fill cyan" id="analyticsAvgBar"></div></div>
+                        </div>
+                        <div class="metric-card glass-panel">
+                            <span class="metric-label">Highest Rating</span>
+                            <strong class="metric-value" id="analyticsMaxRating">0.0</strong>
+                            <div class="metric-bar"><div class="metric-bar-fill magenta" id="analyticsMaxBar"></div></div>
+                        </div>
+                        <div class="metric-card glass-panel">
+                            <span class="metric-label">Lowest Rating</span>
+                            <strong class="metric-value" id="analyticsMinRating">0.0</strong>
+                            <div class="metric-bar"><div class="metric-bar-fill amber" id="analyticsMinBar"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-grid">
+                        <div class="analytics-chart-panel glass-panel">
+                            <h4 style="margin-bottom: 20px; font-family: 'Orbitron', sans-serif; color: var(--text);">Ratings Distribution</h4>
+                            <div class="chart-container" style="position: relative; height:320px; width:100%">
+                                <canvas id="ratingsChartCanvas"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-detail-panel glass-panel">
+                            <h4 style="margin-bottom: 20px; font-family: 'Orbitron', sans-serif; color: var(--text);">Rating Breakdown</h4>
+                            <div class="stat-list">
+                                <div class="stat-item">
+                                    <span>Superb (9.0+)</span>
+                                    <strong id="countSuperb">0</strong>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Excellent (8.5 - 8.9)</span>
+                                    <strong id="countExcellent">0</strong>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Very Good (8.0 - 8.4)</span>
+                                    <strong id="countVeryGood">0</strong>
+                                </div>
+                                <div class="stat-item">
+                                    <span>Good (under 8.0)</span>
+                                    <strong id="countGood">0</strong>
+                                </div>
+                            </div>
+
+                            <div class="best-movie-highlight" id="bestMovieHighlight" style="margin-top: 24px; padding: 16px; border-radius: var(--radius-sm); background: rgba(201, 0, 255, 0.03); border: 1px solid rgba(201, 0, 255, 0.15);">
+                                <h5 style="color: var(--magenta); font-family: 'Orbitron', sans-serif; margin-bottom: 12px; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase;">★ Top Rated Scraped Movie</h5>
+                                <div style="display: flex; gap: 16px; align-items: center;">
+                                    <img id="bestMoviePoster" src="" style="width: 54px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);" />
+                                    <div>
+                                        <div id="bestMovieTitle" style="font-weight: bold; color: var(--text); font-size: 0.95rem;">None</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">Rating: <strong id="bestMovieRating" style="color: var(--cyan); font-family: var(--font-mono); font-size: 1rem;">0.0</strong></div>
+                                        <div id="bestMovieRank" style="font-size: 0.8rem; color: var(--text-dim); margin-top: 2px;">Rank: #0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ============================================================ -->
+        </main>
+    </div>
+
+    <!-- ========== MOVIE DETAIL MODAL ========== -->
+    <div class="modal-overlay" id="movieModal">
+        <div class="modal-content glass-panel">
+            <button class="modal-close" id="modalClose">✕</button>
+            <div class="modal-body">
+                <div class="modal-poster-wrap">
+                    <img class="modal-poster" id="modalPoster" src="" alt="Movie Poster" />
+                </div>
+                <div class="modal-info">
+                    <div class="modal-rank" id="modalRank">#1</div>
+                    <h2 class="modal-title" id="modalTitle">Movie Title</h2>
+                    <div class="modal-meta-row">
+                        <span class="modal-tag" id="modalYear">2024</span>
+                        <span class="modal-tag" id="modalDuration">2h 22m</span>
+                        <span class="modal-tag" id="modalCertificate">R</span>
+                    </div>
+                    <div class="modal-rating-block">
+                        <span class="modal-star">★</span>
+                        <span class="modal-rating-value" id="modalRating">9.3</span>
+                        <span class="modal-votes" id="modalVotes"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
