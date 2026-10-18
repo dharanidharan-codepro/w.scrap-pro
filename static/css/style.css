@@ -65,24 +65,6 @@
     --glow-violet: 0 0 18px rgba(122, 53, 204, 0.25);
 }
 
-    --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.35), 0 0 60px rgba(0, 240, 255, 0.1);
-    --glow-magenta: 0 0 20px rgba(255, 0, 127, 0.35), 0 0 60px rgba(255, 0, 127, 0.1);
-    --glow-violet: 0 0 20px rgba(157, 0, 255, 0.3);
-
-    --radius: 20px;
-    --radius-sm: 12px;
-    --radius-pill: 999px;
-    --blur: 24px;
-    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    --font-display: "Orbitron", sans-serif;
-    --font-accent: "Audiowide", sans-serif;
-    --font-mono: "Share Tech Mono", "Courier New", monospace;
-    --font-body: "Inter", -apple-system, sans-serif;
-
-    --sidebar-w: 280px;
-}
-
 /* ---------- Reset ---------- */
 *, *::before, *::after {
     box-sizing: border-box;
